@@ -8,12 +8,13 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.RemoteInput;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
@@ -101,6 +102,8 @@ public class DisplayNotificationTask extends AsyncTask<Void, Void, Void> {
           notification.getString("sound")
         );
         nb = nb.setSound(sound);
+      } else {
+        nb = nb.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
       }
 
       if (notification.containsKey("subtitle")) {
@@ -135,9 +138,14 @@ public class DisplayNotificationTask extends AsyncTask<Void, Void, Void> {
         }
 
         if (bigPicture.containsKey("largeIcon")) {
-          Bitmap largeIcon = getBitmap(bigPicture.getString("largeIcon"));
-          if (largeIcon != null) {
-            bp = bp.bigLargeIcon(largeIcon);
+          String largeIconStr = bigPicture.getString("largeIcon");
+          if (largeIconStr == null) {
+            bp = bp.bigLargeIcon(null);
+          } else {
+            Bitmap largeIconBitmap = getBitmap(largeIconStr);
+            if (largeIconBitmap != null) {
+              bp = bp.bigLargeIcon(largeIconBitmap);
+            }
           }
         }
 
@@ -266,6 +274,8 @@ public class DisplayNotificationTask extends AsyncTask<Void, Void, Void> {
       if (android.containsKey("priority")) {
         Double priority = android.getDouble("priority");
         nb = nb.setPriority(priority.intValue());
+      } else {
+        nb = nb.setPriority(NotificationCompat.PRIORITY_MAX);
       }
 
       if (android.containsKey("progress")) {
